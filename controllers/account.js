@@ -253,9 +253,9 @@ exports.update = (req, h) => {
 			var Bcrypt = require('bcrypt');
 			data.password = Bcrypt.hashSync(req.payload.password, 10);
 		}
-		return account.update(data);
-	}).then((data) => {
-		return { message: "Account data updated successfully" };
+		return account.update(data).exec().then(() => {
+			return { message: "Account data updated successfully" };
+		})		
 	}).catch((err) => {
 		return Boom.boomify(err, { statusCode: 422 });
 	});

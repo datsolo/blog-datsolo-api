@@ -26,5 +26,18 @@ module.exports = [
         method: 'PUT',
         path: '/blog/{id}',
         handler: BlogController.update
+    },
+    {
+        method: 'PUT',
+        path: '/like/{id}',
+        handler: BlogController.like
+    },
+    {
+        method: 'GET',
+        path: '/blog/{id}',
+        config: {
+            auth: false
+        },
+        handler: BlogController.detail
     }
 ]

@@ -10,7 +10,7 @@ const perPage = 10;
 
 exports.list = (req, h) => {
     var current_page = req.query['page'] || 1;
-    return Blog.find().skip((perPage * current_page) - perPage).limit(perPage).populate('user').populate('hastag').lean().exec().then((blogs) => {
+    return Blog.find().skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').lean().exec().then((blogs) => {
         if (!blogs) return Boom.badData('No result');
         return { blogs };
     }).catch((err) => {
@@ -50,7 +50,8 @@ exports.remove = (req, h) => {
 exports.update = (req, h) => {
     return Blog.update({ _id: req.params.id }, { ...req.payload }, function (err, raw) {
         if (err) return Boom.boomify(err, { statusCode: 422 });
-        return { message: "Blog updated successfully" };
+    }).exec().then(() => {
+        return {message: "Blog updated successfully"};
     })
 }
 
@@ -66,7 +67,8 @@ exports.like = (req, h) => {
             });
             return Blog.update({_id: blog_id}, {like: blog.like}, function (err, raw) {
                 if (err) return Boom.boomify(err, { statusCode: 422 });
-                return {message: "liked", blog: blog};
+            }).exec().then(() => {
+                return {message: "liked"};
             })
             
         }
@@ -74,10 +76,23 @@ exports.like = (req, h) => {
             blog.like.push(user_id);
             return Blog.update({_id: blog_id}, {like: blog.like}, function (err, raw) {
                 if (err) return Boom.boomify(err, { statusCode: 422 });
-                return {message: "unliked", blog: blog};
+            }).exec().then(() => {
+                return {message: "unliked"};
             })
         }
     }).catch(err => {
         return Boom.boomify(err, { statusCode: 422 });
     })
 }
+
+exports.detail = (req, h) => {
+    return Blog.findById(req.params.id).populate('user_id').populate('hastag').exec().then((blog) => {
+		if (!blog) return { message: 'Blog not Found' };
+		return blog;
+	}).catch((err) => {
+
+		return Boom.boomify(err, { statusCode: 422 });
+
+	});
+}
+
