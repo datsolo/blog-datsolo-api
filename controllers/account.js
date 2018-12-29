@@ -183,6 +183,7 @@ exports.create = (req, h) => {
 exports.auth = (req, h) => {
 	var user = new User()
 	return user.load_user_from_session(req.headers.sessionid).then((account) => {
+		if(!account) Boom.boomify(err, { statusCode: 401 });
 		return account;
 	}).catch((err) => {
 		return Boom.boomify(err, { statusCode: 401 });

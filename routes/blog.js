@@ -58,7 +58,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/myblog',
+        path: '/myblog/{id}',
         handler: BlogController.listByUser
     }
 ]

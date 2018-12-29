@@ -127,7 +127,7 @@ exports.searchByHastag = (req, h) => {
 
 exports.listByUser =  (req, h) => {
     var current_page = req.query['page'] || 1;
-    return Blog.find({user_id: req.auth.credentials.user._id}).skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').sort({ created: 'desc' }).lean().exec().then((blogs) => {
+    return Blog.find({user_id: req.params.id}).skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').sort({ created: 'desc' }).lean().exec().then((blogs) => {
         if (!blogs) return Boom.badData('No result');
         return { blogs };
     }).catch((err) => {
