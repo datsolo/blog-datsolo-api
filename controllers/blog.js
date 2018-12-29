@@ -10,7 +10,7 @@ const perPage = 10;
 
 exports.list = (req, h) => {
     var current_page = req.query['page'] || 1;
-    return Blog.find().skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').lean().exec().then((blogs) => {
+    return Blog.find().skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').sort({ created: 'desc' }).lean().exec().then((blogs) => {
         if (!blogs) return Boom.badData('No result');
         return { blogs };
     }).catch((err) => {
@@ -51,33 +51,33 @@ exports.update = (req, h) => {
     return Blog.update({ _id: req.params.id }, { ...req.payload }, function (err, raw) {
         if (err) return Boom.boomify(err, { statusCode: 422 });
     }).exec().then(() => {
-        return {message: "Blog updated successfully"};
+        return { message: "Blog updated successfully" };
     })
 }
 
 exports.like = (req, h) => {
     var user_id = req.auth.credentials.user._id;
     var blog_id = req.params.id;
-    return Blog.findById(blog_id).exec().then( (blog) => {
-        if(!blog) return Boom.badData('Blog not found');
+    return Blog.findById(blog_id).exec().then((blog) => {
+        if (!blog) return Boom.badData('Blog not found');
         var index = blog.like.indexOf(user_id);
-        if(index >= 0) {
+        if (index >= 0) {
             blog.like = blog.like.filter((user) => {
                 return (user.toString() !== user_id.toString());
             });
-            return Blog.update({_id: blog_id}, {like: blog.like}, function (err, raw) {
+            return Blog.update({ _id: blog_id }, { like: blog.like }, function (err, raw) {
                 if (err) return Boom.boomify(err, { statusCode: 422 });
             }).exec().then(() => {
-                return {message: "liked"};
+                return { message: "liked" };
             })
-            
+
         }
         else {
             blog.like.push(user_id);
-            return Blog.update({_id: blog_id}, {like: blog.like}, function (err, raw) {
+            return Blog.update({ _id: blog_id }, { like: blog.like }, function (err, raw) {
                 if (err) return Boom.boomify(err, { statusCode: 422 });
             }).exec().then(() => {
-                return {message: "unliked"};
+                return { message: "unliked" };
             })
         }
     }).catch(err => {
@@ -87,12 +87,51 @@ exports.like = (req, h) => {
 
 exports.detail = (req, h) => {
     return Blog.findById(req.params.id).populate('user_id').populate('hastag').exec().then((blog) => {
-		if (!blog) return { message: 'Blog not Found' };
-		return blog;
-	}).catch((err) => {
+        if (!blog) return { message: 'Blog not Found' };
+        return blog;
+    }).catch((err) => {
 
-		return Boom.boomify(err, { statusCode: 422 });
+        return Boom.boomify(err, { statusCode: 422 });
 
-	});
+    });
+}
+
+exports.search = (req, h) => {
+    if (req.query.keyword !== '') {
+        return Blog.find({ content: { $regex: req.query.keyword, $options: 'i' } }).exec().then((blogs) => {
+            if (!blogs) return Boom.badData('No result');
+            return { blogs }
+        }).catch((err) => {
+            return Boom.boomify(err, { statusCode: 422 });
+        });
+    } else {
+        return { blogs: [] }
+    }
+}
+
+exports.searchByHastag = (req, h) => {
+    console.log(req.query)
+    let hastag = [req.query.hastag]
+    if (hastag !== []) {
+        return Blog.find({ hastag:  hastag  }).exec().then((blogs) => {
+            if (!blogs) return Boom.badData('No result');
+            return { blogs }
+        }).catch((err) => {
+            return Boom.boomify(err, { statusCode: 422 });
+        });
+    } else {
+        return { blogs: [] }
+    }
+}
+
+
+exports.listByUser =  (req, h) => {
+    var current_page = req.query['page'] || 1;
+    return Blog.find({user_id: req.auth.credentials.user._id}).skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').sort({ created: 'desc' }).lean().exec().then((blogs) => {
+        if (!blogs) return Boom.badData('No result');
+        return { blogs };
+    }).catch((err) => {
+        return Boom.boomify(err, { statusCode: 422 });
+    })
 }
 

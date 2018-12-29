@@ -39,5 +39,26 @@ module.exports = [
             auth: false
         },
         handler: BlogController.detail
+    },
+    {
+        method: 'GET',
+        path: '/blog/search',
+        config: {
+            auth: false
+        },
+        handler: BlogController.search
+    },
+    {
+        method: 'GET',
+        path: '/blog/hastag',
+        config: {
+            auth: false
+        },
+        handler: BlogController.searchByHastag
+    },
+    {
+        method: 'GET',
+        path: '/myblog',
+        handler: BlogController.listByUser
     }
 ]

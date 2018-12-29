@@ -18,7 +18,7 @@ exports.create = (req, h) => {
         content: req.payload.content,
     };
 
-    return Blog.create(hastagData).then((hastag) => {
+    return Hastag.create(hastagData).then((hastag) => {
         return { message: "hastag created successfully", hastag: hastag };
     })
         .catch((err) => {
@@ -29,7 +29,7 @@ exports.create = (req, h) => {
 exports.remove = (req, h) => {
     return Hastag.findById(req.params.id).exec().then((hastag) => {
         if (!hastag) return Boom.badData('Hastag not found');
-        return hastag.remove().then((data) => {
+        return hastag.remove().then(() => {
             return { message: "Remove successfuly", hastag: hastag };
         })
             .catch((err) => {
