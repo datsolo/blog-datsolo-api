@@ -11,8 +11,9 @@ const perPage = 10;
 exports.list = (req, h) => {
     var current_page = req.query['page'] || 1;
     return Blog.find().skip((perPage * current_page) - perPage).limit(perPage).populate('user_id').populate('hastag').sort({ created: 'desc' }).lean().exec().then((blogs) => {
-        if (!blogs) return Boom.badData('No result');
-        return { blogs };
+        return Blog.count().exec().then(count => {
+        return { blogs: blogs, current: parseInt(current_page), pages: Math.ceil(count / perPage) };
+        })
     }).catch((err) => {
         return Boom.boomify(err, { statusCode: 422 });
     })
@@ -98,7 +99,7 @@ exports.detail = (req, h) => {
 
 exports.search = (req, h) => {
     if (req.query.keyword !== '') {
-        return Blog.find({ content: { $regex: req.query.keyword, $options: 'i' } }).exec().then((blogs) => {
+        return Blog.find({ content: { $regex: req.query.keyword, $options: 'i' } }).populate('hastag').populate('user_id').sort({ created: 'desc' }).exec().then((blogs) => {
             if (!blogs) return Boom.badData('No result');
             return { blogs }
         }).catch((err) => {
@@ -113,7 +114,7 @@ exports.searchByHastag = (req, h) => {
     console.log(req.query)
     let hastag = [req.query.hastag]
     if (hastag !== []) {
-        return Blog.find({ hastag:  hastag  }).exec().then((blogs) => {
+        return Blog.find({ hastag:  hastag  }).populate('user_id').populate('hastag').sort({ created: 'desc' }).exec().then((blogs) => {
             if (!blogs) return Boom.badData('No result');
             return { blogs }
         }).catch((err) => {

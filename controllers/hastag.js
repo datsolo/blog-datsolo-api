@@ -37,3 +37,13 @@ exports.remove = (req, h) => {
             })
     })
 }
+
+exports.detail = (req, h) => {
+    return Hastag.findById(req.params.id).exec().then((hastag) => {
+        if(!hastag) return Boom.badData('Hastag not found');
+        return hastag;
+    })
+    .catch(err => {
+        return Boom.boomify(err, { statusCode: 422 });
+    })
+}

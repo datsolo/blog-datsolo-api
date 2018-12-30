@@ -28,5 +28,13 @@ module.exports = [
             auth: false
         },
         handler: HastagController.remove
+    },
+    {
+        method: 'GET',
+        path: '/hastagdetail/{id}',
+        config: {
+            auth: false
+        },
+        handler: HastagController.detail
     }
 ]
