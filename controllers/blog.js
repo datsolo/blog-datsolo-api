@@ -6,7 +6,7 @@ var Hastag = require('../models/hastag');
 var User = require('../classes/user');
 var Comment = require('../models/comment');
 
-const perPage = 10;
+const perPage = 20;
 
 exports.list = (req, h) => {
     var current_page = req.query['page'] || 1;
