@@ -9,46 +9,7 @@ var Session = require('../models/session');
 // declare number of record per page
 const perPage = 10;
 
-// exports.auth = async (req, h) => {
-// 	// const accesstoken='EMAWfI9fg2QkVI03ftjFrojvX1clbNLe5ZAAjZCrVpN3w1VABLxucxoZAvnK5WXC5hSkZBeYk5zFJU8ikqC2fOUAL6b12ohj0SzyjUboDmIAZDZD';
-// 	// var accesstoken = req.query.accesstoken;
-// 	return new Promise((resolve, reject) => {
-// 		// return request('https://graph.accountkit.com/v1.0/me/?access_token=' + accesstoken, function (error, response, body) {
-// 			if (error) {
-// 				return reject(Boom.unauthorized('facebook down'));
-// 			}
-// 			else if (response.statusCode !== 200) {
-// 				return reject(Boom.unauthorized('facebook return incorrect'));
-// 			}
-// 			else {
-// 				var temp = JSON.parse(body);
-// 				var phone = temp.phone.national_number;
-// 				console.log("temp: "+ phone);
 
-// 		return Account.findOne({ phone: phone }).exec().then(account => {
-// 			if (account != null) {
-// 				var user = new User(account);
-// 				if (account.state === "inactive") {
-// 					return user.generate_session().then(result => {
-// 						return resolve({ account: null, sessionid: result.sessionid });
-// 					});
-// 				}
-// 				return resolve(user.generate_session());
-// 			}
-// 			var user = new User();
-// 			return user.create({ name: phone, phone: phone }).then((account) => {
-// 				var user = new User(account);
-// 				return user.generate_session().then(result => {
-// 					return resolve({ account: null, sessionid: result.sessionid });
-// 				});
-// 			});
-// 		}).catch((err) => {
-// 			return reply(Boom.badImplementation());
-// 			// return reject(Boom.boomify(err, { statusCode: 422 }));
-// 		});
-// 		}
-// 	});
-// }
 
 exports.login = (req, h) => {
 	return Account.findOne({ $or: [{ phone: req.payload.username }, { username: req.payload.username }] }).exec().then((account) => {
@@ -128,43 +89,11 @@ exports.getByPhone = (req, h) => {
 }
 
 
-exports.add = (req, h) => {
 
 
-	var updateObj = { favourite: Date.now() };
 
-	return Account.findByIdAndUpdate(req.params.id, updateObj).exec().then((account) => {
 
-		if (!account) return { message: 'Account not Found' };
 
-		return { account: account };
-
-	}).catch((err) => {
-
-		return Boom.boomify(err, { statusCode: 422 });
-
-	});
-}
-
-// exports.remove = (req, h) => {
-
-// 	return Account.findByIdAndUpdate(req.params.id).exec().then((account) => {
-
-// 		if (!account) return { message: 'Account not Found' };
-
-// 		return { account: account };
-
-// 	}).catch((err) => {
-
-// 		return Boom.boomify(err, { statusCode: 422 });
-
-// 	});
-// }
-
-/**
- * POST a Account
- * thu2603
- */
 exports.create = (req, h) => {
 	var user = new User();
 	return user.create(req.payload).then((account) => {
@@ -192,55 +121,6 @@ exports.auth = (req, h) => {
 
 
 
-//upload avatar
-// exports.upload = (req, h) => {
-// 	var URL = require('../classes/helper').getRootUrl();
-// 	return Account.findById(req.auth.credentials.user._id).exec().then((account) => {
-
-// 		if (!account) return { err: 'Account not found' };
-
-// 		// var base64Data = req.rawBody.replace(/^data:image\/png;base64,/, "");
-// 		var base64Data = req.payload.avatar;
-// 		var extension = null;
-// 		switch (base64Data.charAt(0)) {
-// 			case '/': {
-// 				extension = '.jpg';
-// 				break;
-// 			}
-// 			case 'i': {
-// 				extension = '.png';
-// 				break;
-// 			}
-// 			case 'R': {
-// 				extension = '.gif';
-// 				break;
-// 			}
-// 			default: {
-// 				extension = '.jpg';
-// 				break;
-// 			}
-// 		}
-
-// 		require("fs").writeFileSync("../img/avatar/" + account._id + extension, base64Data, 'base64');
-
-// 		var avatar_path = URL + 'img/avatar/' + account._id + extension;
-// 		account.avatar = avatar_path;
-// 		account.save();
-// 		return { account };
-
-// 	}).catch((err) => {
-
-// 		return Boom.boomify(err, { statusCode: 422 });
-
-// 	});
-// }
-
-
-
-/**
- * PUT | Update Account by ID
- * thu2603
- */
 exports.update = (req, h) => {
 	var data = req.payload;
 
@@ -261,41 +141,10 @@ exports.update = (req, h) => {
 		return Boom.boomify(err, { statusCode: 422 });
 	});
 
-	// return Account.update({ _id: req.params.id }, { ...req.payload }, function (err, raw) {
-	// 	if (err) return Boom.boomify(err, { statusCode: 422 });
-	// 	return { message: "Account data updated successfully" };
-	// })
 }
 
 
 
-/**
- * PUT | Update Account by ID
- */
-// exports.status = (req, h) => {
-// 	return Account.findById(req.auth.credentials.user._id).exec().then((account) => {
-// 		if (!account) return { err: 'Account not found' };
-// 		account.status = req.payload.status;
-// 		return account.save().then((account) => {
-// 			var data = {
-// 				pusher: {
-// 					event: 'account-change-status',
-// 					content: 'Change status successfully!'
-// 				},
-// 				firebase: {
-// 					title: 'Change status!',
-// 					body: `Account ${account._id} just has changed status`,
-// 				}
-// 			}
-// 			Notification.notify(data, account._id);
-
-// 			return { account };
-// 		}).catch((err) => {
-// 			return Boom.boomify(err, { statusCode: 422 });
-// 		});
-
-// 	});
-// }
 
 /**
  * Delete Account by ID
@@ -334,67 +183,3 @@ exports.search = (req, h) => {
 	}
 }
 
-// add each account to favorite list
-// exports.addFavorite = (req, h) => {
-// 	var account_id = (req.auth.credentials.user.type == 'admin') ? req.payload.current_id : req.auth.credentials.user._id;
-// 	return Account.findById(account_id).exec().then(account => {
-// 		if(account.blacklist.indexOf(req.payload.favorite_account) >= 0) {
-// 			account.blacklist.pull(req.payload.favorite_account);
-// 		}
-// 		if(account.favorite.indexOf(req.payload.favorite_account) < 0) {
-// 			account.favorite.push(req.payload.favorite_account);
-// 			return account.save().then(result => {
-// 				return {account: result}
-// 			});
-// 		}
-// 		return Boom.badData("This account already added in favorite list");
-// 	}).catch(err => {
-// 		return Boom.boomify(err, { statusCode: 422 });
-// 	});
-// }
-
-// exports.removeFavorite = (req, h) => {
-// 	var account_id = (req.auth.credentials.user.type == 'admin') ? req.payload.current_id : req.auth.credentials.user._id;
-// 	return Account.findByIdAndUpdate(account_id, {$pull: {favorite: req.payload.favorite_account}}, {new: true}, function (err, account) {
-// 		if (err) return Boom.boomify(err, { statusCode: 422 });
-// 		return {account};
-// 	})
-// }
-
-// add each account to black list
-// exports.addToBlackList = (req, h) => {
-// 	var account_id = (req.auth.credentials.user.type == 'admin') ? req.payload.current_id : req.auth.credentials.user._id;
-// 	return Account.findById(account_id).exec().then(account => {
-// 		if(account.favorite.indexOf(req.payload.blacklist_account) >= 0) {
-// 			account.favorite.pull(req.payload.blacklist_account);
-// 		}
-// 		if(account.blacklist.indexOf(req.payload.blacklist_account) < 0) {
-// 			account.blacklist.push(req.payload.blacklist_account);
-// 			return account.save().then(result => {
-// 				return {account: result}
-// 			});
-// 		}
-// 		return Boom.badData("This account already added in black list");
-// 	}).catch(err => {
-// 		return Boom.boomify(err, { statusCode: 422 });
-// 	});
-// }
-
-// exports.removeFromBlackList = (req, h) => {
-// 	var account_id = (req.auth.credentials.user.type == 'admin') ? req.payload.current_id : req.auth.credentials.user._id;
-// 	return Account.findByIdAndUpdate(account_id, {$pull: {blacklist: req.payload.blacklist_account}}, {new: true}, function (err, account) {
-// 		if (err) return Boom.boomify(err, { statusCode: 422 });
-// 		return {account};
-// 	})
-// }
-
-// exports.updateLocation = (req, h) => {
-// 	return Session.findOne({user_id: req.params.id}).exec().then(session => {
-// 		session.coordinates = new Array(req.payload.lat, req.payload.lng);
-// 		return session.save().then(session => {
-// 			return {session};
-// 		})
-// 	}).catch(err => {
-// 		return Boom.badData("Not found!");
-// 	})
-// }
